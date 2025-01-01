@@ -1,23 +1,24 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_URL = 'http://localhost:5000/api/auth';
+// Define API URL
+const API_URL = "http://localhost:5000/api/auth";
 
-// Sign Up
-export const signUp = async (email, password) => {
+// SignUp API function
+export const signUp = async (data) => {
   try {
-    const response = await axios.post(`${API_URL}/signup`, { email, password });
+    const response = await axios.post(`${API_URL}/signup`, data);
     return response.data;
   } catch (error) {
-    throw error.response.data.error;
+    throw new Error(error.response?.data?.error || "Something went wrong");
   }
 };
 
-// Sign In
-export const signIn = async (email, password) => {
+// SignIn API function
+export const signIn = async (data) => {
   try {
-    const response = await axios.post(`${API_URL}/signin`, { email, password });
+    const response = await axios.post(`${API_URL}/signin`, data);
     return response.data;
   } catch (error) {
-    throw error.response.data.error;
+    throw new Error(error.response?.data?.error || "Something went wrong");
   }
 };

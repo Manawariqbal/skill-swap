@@ -1,101 +1,74 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import { signIn } from "../api/auth"; // Import signIn API call
 
-const SignInForm = ({ onClose }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const SignInForm = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
-  // Handle form submission
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validate form inputs
-    if (!email || !password) {
-      setError('Both email and password are required');
-      return;
-    }
-
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
-
-    setIsSubmitting(true);
     try {
-      // Sending the data to the backend /signin route
-      const response = await axios.post('http://localhost:5000/signin', {
-        email,
-        password,
-      });
-
-      // If successful, handle the response (store JWT token or redirect)
-      console.log(response.data); // For example, save the token in localStorage
-      alert('Sign In Successful');
-      onClose();
+      const response = await signIn(formData);
+      setSuccessMessage(response.message);
+      setError("");
     } catch (err) {
-      // Handle error
-      setError(err.response ? err.response.data.error : 'Error signing in');
-    } finally {
-      setIsSubmitting(false);
+      setError(err.message || "Something went wrong");
+      setSuccessMessage("");
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
-        <h2 className="text-2xl font-bold mb-4">Sign In</h2>
-        
-        {/* Show error if any */}
-        {error && <p className="text-red-500">{error}</p>}
-        
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              className="w-full p-2 border border-gray-300 rounded"
-              required
-            />
-          </div>
-          <div>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className="w-full p-2 border border-gray-300 rounded"
-              required
-            />
-          </div>
-          
-          {/* Submit Button */}
-          <div>
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white p-2 rounded disabled:bg-blue-300"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Signing In...' : 'Sign In'}
-            </button>
-          </div>
+    <div className="max-w-md mx-auto bg-white p-8 shadow-lg rounded-md">
+      <h2 className="text-2xl font-semibold text-center mb-6">Sign In</h2>
+      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+      {successMessage && <p className="text-green-500 text-center mb-4">{successMessage}</p>}
 
-          {/* Cancel Button */}
-          <div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-full mt-2 bg-gray-200 p-2 rounded"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full mt-2 p-2 border border-gray-300 rounded-md"
+            required
+          />
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full mt-2 p-2 border border-gray-300 rounded-md"
+            required
+          />
+        </div>
+
+        <div className="flex justify-center">
+          <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-md">
+            Sign In
+          </button>
+        </div>
+      </form>
     </div>
   );
 };
